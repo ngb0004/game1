@@ -1,0 +1,79 @@
+@inject GameData Data
+@inject SettingsStore Store
+@inject IJSRuntime JS
+
+<div class="screen menu">
+    <header class="menu-head">
+        <h1>Rotation Raider</h1>
+        <p class="tagline">Rotation combat. Perfect blocks. Pure skill.</p>
+    </header>
+
+    <section class="boss-list">
+        @foreach (var boss in Data.BossesSorted())
+        {
+            var best = Store.Best.TryGetValue(boss.Id, out var b) ? b : null;
+            <button class="boss-card @(boss.IsDummy ? "dummy" : "")" @onclick="() => OnFight.InvokeAsync(boss.Id)">
+                <span class="boss-name">@boss.Name</span>
+                <span class="boss-title">@boss.Title</span>
+                <span class="boss-meta">
+                    @if (boss.IsDummy)
+                    {
+                        <span>@(boss.EnrageMs / 1000)s · no attacks</span>
+                    }
+                    else
+                    {
+                        <span>@(boss.Hp.ToString("N0")) HP · enrage @(boss.EnrageMs / 1000)s</span>
+                    }
+                </span>
+                @if (best != null)
+                {
+                    <span class="best tier-@ParseScore.Tier(best.Score)">Best @best.Score · @best.Dps.ToString("N0") DPS</span>
+                }
+                <span class="fight-cta">Fight ▶</span>
+            </button>
+        }
+    </section>
+
+    <nav class="menu-actions">
+        <button class="btn" @onclick="() => _help = !_help">@(_help ? "Hide" : "How to play")</button>
+        <button class="btn" @onclick="OnSettings">Settings</button>
+        <button class="btn" @onclick="OnCalibrate">Calibrate latency</button>
+        <button class="btn" @onclick="Fullscreen">Fullscreen</button>
+    </nav>
+
+    @if (_help)
+    {
+        <section class="help">
+            <h2>How to play</h2>
+            <p>Beat the boss before the enrage timer. Your score (0–100) is your DPS against a benchmark.</p>
+            <h3>Rotation (right thumb)</h3>
+            <ul>
+                <li><b>Bar A:</b> Raging Blow (2 charges), Rending Strike (applies a bleed), Slam (filler), Rampage (spend 80 Fury).</li>
+                <li><b>Bar B</b> (hold <b>Swap</b>): Execute Strike, Sunder Armor (+6% damage taken, keep it up), Overpower (only after a perfect Block), Berserker Rage.</li>
+                <li><b>Cooldowns:</b> Recklessness (major), Bloodrage (minor), trinket. Line them up with procs and vulnerable windows.</li>
+                <li>Press within 200 ms of the global cooldown ending and the ability is queued for the exact moment it ends.</li>
+                <li>A glowing button means a proc. If it's on Bar B, the Swap button glows too.</li>
+            </ul>
+            <h3>Defense (left thumb)</h3>
+            <ul>
+                <li>The ring closes on the boss's attack. Gold shield = <b>Block</b>. Red arrows = <b>Dodge</b>.</li>
+                <li>Press in the last 400 ms to avoid it, in the last 150 ms for a <b>Perfect</b>: +5% damage, and perfect blocks enable Overpower, perfect dodges give Fury.</li>
+                <li>Five perfects in a row triggers <b>Flow</b>. Getting hit staggers you briefly.</li>
+            </ul>
+            <h3>Keyboard</h3>
+            <p><kbd>1</kbd>–<kbd>4</kbd> abilities · hold <kbd>Q</kbd> swap · <kbd>E</kbd> major · <kbd>R</kbd> minor · <kbd>T</kbd> trinket · <kbd>Space</kbd>/<kbd>J</kbd> block · <kbd>Shift</kbd>/<kbd>K</kbd> dodge · <kbd>Esc</kbd> pause</p>
+        </section>
+    }
+
+    <footer class="menu-foot">Prototype · data @Data.Version</footer>
+</div>
+
+@code {
+    [Parameter] public EventCallback<string> OnFight { get; set; }
+    [Parameter] public EventCallback OnSettings { get; set; }
+    [Parameter] public EventCallback OnCalibrate { get; set; }
+
+    bool _help;
+
+    async Task Fullscreen() => await JS.InvokeVoidAsync("RR.fullscreen");
+}

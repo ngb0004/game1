@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RR.Client/RR.Client.csproj" />
+    <Project Path="src/RR.Sim/RR.Sim.csproj" />
+    <Project Path="src/RR.Web/RR.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RR.Sim.Tests/RR.Sim.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/RR.SimRunner/RR.SimRunner.csproj" />
+  </Folder>
+</Solution>

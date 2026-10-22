@@ -1,0 +1,135 @@
+@implements IAsyncDisposable
+@inject GameData Data
+@inject SettingsStore Store
+@inject IJSRuntime JS
+@using RR.Client
+@using RR.Sim.Core
+
+<div class="fight-root">
+    <canvas id="rr-canvas"></canvas>
+
+    @if (_paused)
+    {
+        <div class="overlay">
+            <div class="panel">
+                <h2>Paused</h2>
+                <button class="btn primary" @onclick="Resume">Resume</button>
+                @if (_session?.Sim.Boss.Def.IsDummy == true)
+                {
+                    <button class="btn" @onclick="EndNow">End fight (not scored)</button>
+                }
+                <button class="btn" @onclick="Restart">Restart</button>
+                <button class="btn" @onclick="Quit">Quit to menu</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string BossId { get; set; }
+    [Parameter] public EventCallback<FightResult> OnFinished { get; set; }
+    [Parameter] public EventCallback OnQuit { get; set; }
+
+    GameSession _session;
+    FightBridge _bridge;
+    DotNetObjectReference<FightBridge> _bridgeRef;
+    DotNetObjectReference<FightScreen> _selfRef;
+    bool _paused;
+    bool _disposed;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await StartFight();
+    }
+
+    async Task StartFight()
+    {
+        var setup = new FightSetup
+        {
+            ClassId = "berserker",
+            BossId = BossId,
+            Seed = (ulong)Random.Shared.NextInt64(1, long.MaxValue),
+            InputOffsetMs = Store.Settings.InputOffsetMs,
+        };
+        _session = new GameSession(Data, setup, Store.Settings.SwapMode);
+        _bridge = new FightBridge(Data, _session);
+        _bridge.Ended += () => _ = InvokeAsync(OnSimEnded);
+        _bridgeRef = DotNetObjectReference.Create(_bridge);
+        _selfRef ??= DotNetObjectReference.Create(this);
+        _paused = false;
+        await JS.InvokeVoidAsync("RR.fight.start", "rr-canvas", _bridgeRef, _selfRef, _bridge.InitJson(Store.Settings));
+    }
+
+    [JSInvokable]
+    public void OnPaused()
+    {
+        _paused = true;
+        StateHasChanged();
+    }
+
+    async Task Resume()
+    {
+        _paused = false;
+        await JS.InvokeVoidAsync("RR.fight.resume");
+    }
+
+    async Task EndNow()
+    {
+        _paused = false;
+        await JS.InvokeVoidAsync("RR.fight.resume");
+        await JS.InvokeVoidAsync("RR.fight.sendInput", (int)ClientInput.EndFight);
+    }
+
+    async Task Restart()
+    {
+        await JS.InvokeVoidAsync("RR.fight.stop");
+        _bridgeRef?.Dispose();
+        await StartFight();
+    }
+
+    async Task Quit()
+    {
+        await JS.InvokeVoidAsync("RR.fight.stop");
+        await OnQuit.InvokeAsync();
+    }
+
+    async Task OnSimEnded()
+    {
+        // Let the death / enrage animation play before the results.
+        await Task.Delay(2200);
+        if (_disposed) return;
+        await JS.InvokeVoidAsync("RR.fight.stop");
+
+        var report = _session.Report;
+        var boss = _session.Sim.Boss.Def;
+        int score = ParseScore.Score(boss, report.Dps);
+        // Only kills (or a full dummy timer) are parses.
+        bool newBest = report.Victory && await Store.RecordAsync(boss.Id, new BestRecord
+        {
+            Score = score, Dps = Math.Round(report.Dps), Seconds = Math.Round(report.DurationSeconds, 1), Victory = true,
+        });
+        await OnFinished.InvokeAsync(new FightResult
+        {
+            Boss = boss,
+            Report = report,
+            Log = _session.CreateLog(),
+            Score = score,
+            Tier = ParseScore.Tier(score),
+            NewBest = newBest,
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposed = true;
+        try
+        {
+            await JS.InvokeVoidAsync("RR.fight.stop");
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        _bridgeRef?.Dispose();
+        _selfRef?.Dispose();
+    }
+}

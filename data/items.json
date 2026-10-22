@@ -1,0 +1,38 @@
+[
+  {
+    "id": "notched_greataxe",
+    "name": "Notched Greataxe",
+    "slot": "weapon",
+    "rarity": "uncommon",
+    "itemLevel": 100,
+    "stats": { "attackPower": 150, "critPct": 2 },
+    "skin": "weapon_axe_basic"
+  },
+  {
+    "id": "iron_helm",
+    "name": "Iron Helm",
+    "slot": "helm",
+    "rarity": "uncommon",
+    "itemLevel": 100,
+    "stats": { "attackPower": 30, "hastePct": 3 },
+    "skin": "helm_iron"
+  },
+  {
+    "id": "chain_hauberk",
+    "name": "Chain Hauberk",
+    "slot": "chest",
+    "rarity": "uncommon",
+    "itemLevel": 100,
+    "stats": { "attackPower": 40, "critPct": 1, "masteryPct": 3 },
+    "skin": "chest_chain"
+  },
+  {
+    "id": "vial_of_fury",
+    "name": "Vial of Fury",
+    "slot": "trinket",
+    "rarity": "rare",
+    "itemLevel": 100,
+    "stats": { "critPct": 1 },
+    "useAbility": "trinket_vial_of_fury"
+  }
+]

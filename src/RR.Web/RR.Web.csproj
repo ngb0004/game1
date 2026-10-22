@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <!--
+    Browser front-end. Stands in for the Unity RR.Game layer: renders sim
+    events on a canvas (wwwroot/js/rr.js) and feeds touch/keyboard input in.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.13" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RR.Sim\RR.Sim.csproj" />
+    <ProjectReference Include="..\RR.Client\RR.Client.csproj" />
+  </ItemGroup>
+
+  <!-- Game data ships inside the app; the same files load in tests, the runner and Unity. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\data\*.json" LogicalName="data/%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- The sim's DTOs are filled by reflection (Newtonsoft), so keep them whole. -->
+  <ItemGroup>
+    <TrimmerRootAssembly Include="RR.Sim" />
+    <TrimmerRootAssembly Include="RR.Client" />
+    <TrimmerRootAssembly Include="Newtonsoft.Json" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,61 @@
+name: Test and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test
+        run: dotnet test tests/RR.Sim.Tests --verbosity normal
+
+      - name: Balance check (headless bots)
+        run: dotnet run --project tools/RR.SimRunner -c Release -- balance gorrath_the_pale 20
+
+      - name: Publish web build
+        run: dotnet publish src/RR.Web -c Release -o publish
+
+      - name: Prepare for GitHub Pages
+        run: |
+          cd publish/wwwroot
+          # Served from /<repo>/, not the domain root.
+          sed -i 's|<base href="/" />|<base href="/${{ github.event.repository.name }}/" />|' index.html
+          rm -f index.html.br index.html.gz
+          cp index.html 404.html
+          # Let _framework through (Jekyll skips folders starting with _).
+          touch .nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: publish/wwwroot
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

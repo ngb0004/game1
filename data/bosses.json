@@ -1,0 +1,56 @@
+[
+  {
+    "id": "training_dummy",
+    "name": "Training Dummy",
+    "title": "60 second DPS check",
+    "archetype": "dummy",
+    "skin": "dummy_straw",
+    "hp": 100000000,
+    "enrageMs": 60000,
+    "isDummy": true,
+    "phases": [ { "untilHpPct": 0, "attackPool": [], "cadenceMs": [3000, 3000] } ],
+    "attacks": {},
+    "parse": [
+      { "score": 0, "dps": 0 },
+      { "score": 25, "dps": 3500 },
+      { "score": 50, "dps": 4500 },
+      { "score": 75, "dps": 5200 },
+      { "score": 95, "dps": 5700 },
+      { "score": 99, "dps": 6000 },
+      { "score": 100, "dps": 6400 }
+    ]
+  },
+  {
+    "id": "gorrath_the_pale",
+    "name": "Gorrath the Pale",
+    "title": "Brute of the Ashen Pit",
+    "archetype": "brute",
+    "skin": "brute_pale",
+    "hp": 1080000,
+    "enrageMs": 180000,
+    "firstAttackMs": 3000,
+    "phases": [
+      { "untilHpPct": 60, "attackPool": ["cleave", "slam", "roar"], "cadenceMs": [2500, 4000] },
+      { "untilHpPct": 0, "attackPool": ["cleave", "slam", "leap", "frenzy"], "cadenceMs": [1800, 3200], "onEnter": "phase2_roar" }
+    ],
+    "attacks": {
+      "cleave":      { "name": "Cleave",       "telegraphMs": 1000, "counter": "block", "damage": 6000,  "anim": "cleave", "vfx": "vfx_arc" },
+      "slam":        { "name": "Slam",         "telegraphMs": 1200, "counter": "block", "damage": 8000,  "perfectWindowMs": 150, "anim": "slam", "vfx": "vfx_ground_crack" },
+      "roar":        { "name": "Bone Roar",    "telegraphMs": 1400, "counter": "dodge", "damage": 7000,  "anim": "roar", "vfx": "vfx_shockwave" },
+      "leap":        { "name": "Crushing Leap","telegraphMs": 1500, "counter": "dodge", "damage": 12000, "anim": "leap", "vfx": "vfx_shockwave" },
+      "frenzy":      { "name": "Frenzy",       "telegraphMs": 900,  "counter": "block", "damage": 9000,  "anim": "frenzy", "vfx": "vfx_claws" },
+      "phase2_roar": { "name": "Pale Fury",    "telegraphMs": 2000, "counter": "none",  "damage": 0,     "anim": "phase_change", "vfx": "vfx_shockwave_big" }
+    },
+    "vulnerableWindows": [ { "afterAttack": "frenzy", "durationMs": 5000, "damageTakenMod": 1.2 } ],
+    "lootTable": "loot_gorrath",
+    "parse": [
+      { "score": 0, "dps": 0 },
+      { "score": 25, "dps": 5000 },
+      { "score": 50, "dps": 6700 },
+      { "score": 75, "dps": 7600 },
+      { "score": 95, "dps": 8500 },
+      { "score": 99, "dps": 9000 },
+      { "score": 100, "dps": 9500 }
+    ]
+  }
+]

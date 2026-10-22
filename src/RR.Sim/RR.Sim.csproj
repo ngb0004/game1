@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Pure deterministic combat simulation. No engine references.
+    Kept to netstandard2.1 + C# 9 so the same source compiles inside Unity 6
+    (see RR.Sim.asmdef and docs/UNITY_PORT.md).
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>RR.Sim</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Unity ships this as com.unity.nuget.newtonsoft-json -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>

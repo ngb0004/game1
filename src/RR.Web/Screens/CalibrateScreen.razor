@@ -1,0 +1,94 @@
+@implements IDisposable
+@inject SettingsStore Store
+@inject IJSRuntime JS
+
+<div class="screen calibrate">
+    <h1>Latency calibration</h1>
+    <p>Tap the pad (or press <kbd>Space</kbd>) exactly on each beat. The first four beats are a count-in.</p>
+
+    <div id="rr-calib-pad" class="calib-pad">
+        <span class="calib-dot"></span>
+        <span class="calib-text">@Status</span>
+    </div>
+
+    @if (_result.HasValue)
+    {
+        <p class="calib-result">Measured offset: <b>@_result ms</b> (median of @_taps taps)</p>
+        @if (_raw.HasValue && _raw.Value < 0)
+        {
+            <p class="hint">You tapped early on average (@_raw ms), so the offset is 0.</p>
+        }
+        <nav class="menu-actions">
+            <button class="btn primary" @onclick="Save">Use @_result ms</button>
+            <button class="btn" @onclick="Run">Try again</button>
+        </nav>
+    }
+    else if (!_running)
+    {
+        <nav class="menu-actions">
+            <button class="btn primary" @onclick="Run">Start</button>
+        </nav>
+    }
+
+    <nav class="menu-actions">
+        <button class="btn" @onclick="Back">Back</button>
+    </nav>
+    <p class="hint">Current offset: @Store.Settings.InputOffsetMs ms</p>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnBack { get; set; }
+
+    DotNetObjectReference<CalibrateScreen> _ref;
+    bool _running;
+    int? _result;
+    int? _raw;
+    int _taps;
+
+    string Status => _running ? "Tap on the beat" : (_result.HasValue ? "Done" : "Ready");
+
+    async Task Run()
+    {
+        _result = null;
+        _running = true;
+        _ref ??= DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("RR.calibrate.start", "rr-calib-pad", _ref, 20, 600);
+    }
+
+    [JSInvokable]
+    public void OnCalibrated(double medianMs, int taps)
+    {
+        _running = false;
+        _taps = taps;
+        if (taps < 6)
+        {
+            _result = null;
+            _raw = null;
+        }
+        else
+        {
+            _raw = (int)Math.Round(medianMs);
+            _result = Math.Clamp(_raw.Value, 0, 150);
+        }
+        StateHasChanged();
+    }
+
+    async Task Save()
+    {
+        Store.Settings.InputOffsetMs = _result ?? 0;
+        await Store.SaveSettingsAsync();
+        await OnBack.InvokeAsync();
+    }
+
+    async Task Back()
+    {
+        await JS.InvokeVoidAsync("RR.calibrate.stop");
+        await OnBack.InvokeAsync();
+    }
+
+    public void Dispose()
+    {
+        _ = JS.InvokeVoidAsync("RR.calibrate.stop");
+        _ref?.Dispose();
+    }
+}

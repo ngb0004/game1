@@ -1,0 +1,81 @@
+[
+  {
+    "id": "rend_bleed",
+    "name": "Rend",
+    "target": "target",
+    "durationMs": 12000,
+    "refresh": "pandemic",
+    "tickMs": 2000,
+    "tickDamage": { "base": 200, "apCoef": 0.6 },
+    "tags": ["bleed", "periodic"],
+    "icon": "🩸", "color": "#8e1b1b"
+  },
+  {
+    "id": "sundered",
+    "name": "Sundered",
+    "target": "target",
+    "durationMs": 15000,
+    "refresh": "pandemic",
+    "damageTakenPct": 6,
+    "icon": "🛡️", "color": "#5d6d7e"
+  },
+  {
+    "id": "enrage",
+    "name": "Enrage",
+    "target": "self",
+    "durationMs": 6000,
+    "refresh": "refresh",
+    "damageDonePct": 10,
+    "icon": "😡", "color": "#e67e22"
+  },
+  {
+    "id": "riposte",
+    "name": "Riposte",
+    "target": "self",
+    "durationMs": 8000,
+    "icon": "⚡", "color": "#f1c40f"
+  },
+  {
+    "id": "recklessness",
+    "name": "Recklessness",
+    "target": "self",
+    "durationMs": 12000,
+    "damageDonePct": 25,
+    "stats": { "critPct": 20 },
+    "icon": "🔥", "color": "#cb4335"
+  },
+  {
+    "id": "bloodrage",
+    "name": "Bloodrage",
+    "target": "self",
+    "durationMs": 10000,
+    "stats": { "hastePct": 30 },
+    "icon": "💢", "color": "#922b21"
+  },
+  {
+    "id": "vial_of_fury",
+    "name": "Vial of Fury",
+    "target": "self",
+    "durationMs": 15000,
+    "stats": { "attackPower": 300 },
+    "icon": "🧪", "color": "#6c3483"
+  },
+  {
+    "id": "perfect_edge",
+    "name": "Perfect Edge",
+    "target": "self",
+    "durationMs": 4000,
+    "refresh": "refresh",
+    "damageDonePct": 5,
+    "icon": "✨", "color": "#5dade2"
+  },
+  {
+    "id": "flow_burst",
+    "name": "Flow",
+    "target": "self",
+    "durationMs": 8000,
+    "damageDonePct": 15,
+    "stats": { "hastePct": 15 },
+    "icon": "🌊", "color": "#48c9b0"
+  }
+]

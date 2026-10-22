@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    EditMode-style sim tests. NUnit 3 with Assert.That only, so the files
+    drop into a Unity Test Framework EditMode assembly unchanged.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RR.Sim\RR.Sim.csproj" />
+    <ProjectReference Include="..\..\src\RR.Client\RR.Client.csproj" />
+    <Compile Include="..\..\tools\RR.SimRunner\RotationBot.cs" Link="Support\RotationBot.cs" />
+  </ItemGroup>
+
+</Project>

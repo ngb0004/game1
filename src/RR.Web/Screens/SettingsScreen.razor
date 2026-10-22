@@ -1,0 +1,56 @@
+@inject SettingsStore Store
+@using RR.Client
+
+<div class="screen settings">
+    <h1>Settings</h1>
+
+    <div class="setting">
+        <label>Bar swap</label>
+        <div class="seg">
+            <button class="@(S.SwapMode == SwapMode.Hold ? "on" : "")" @onclick="() => Set(() => S.SwapMode = SwapMode.Hold)">Hold</button>
+            <button class="@(S.SwapMode == SwapMode.Toggle ? "on" : "")" @onclick="() => Set(() => S.SwapMode = SwapMode.Toggle)">Toggle</button>
+        </div>
+        <p class="hint">Hold: Bar B shows while Swap is held. Toggle: each press flips bars.</p>
+    </div>
+
+    <div class="setting">
+        <label>Input latency offset: <b>@S.InputOffsetMs ms</b></label>
+        <input type="range" min="0" max="150" step="5" value="@S.InputOffsetMs"
+               @oninput="e => Set(() => S.InputOffsetMs = int.Parse(e.Value.ToString()))" />
+        <p class="hint">How late your presses register. Use Calibrate to measure it.</p>
+        <button class="btn" @onclick="OnCalibrate">Calibrate</button>
+    </div>
+
+    <div class="setting">
+        <label>Sound</label>
+        <div class="seg">
+            <button class="@(S.Sound ? "on" : "")" @onclick="() => Set(() => S.Sound = true)">On</button>
+            <button class="@(!S.Sound ? "on" : "")" @onclick="() => Set(() => S.Sound = false)">Off</button>
+        </div>
+    </div>
+
+    <div class="setting">
+        <label>Keyboard hints on buttons</label>
+        <div class="seg">
+            <button class="@(S.ShowKeys ? "on" : "")" @onclick="() => Set(() => S.ShowKeys = true)">On</button>
+            <button class="@(!S.ShowKeys ? "on" : "")" @onclick="() => Set(() => S.ShowKeys = false)">Off</button>
+        </div>
+    </div>
+
+    <nav class="menu-actions">
+        <button class="btn primary" @onclick="OnBack">Done</button>
+    </nav>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnBack { get; set; }
+    [Parameter] public EventCallback OnCalibrate { get; set; }
+
+    PlayerSettings S => Store.Settings;
+
+    async Task Set(Action change)
+    {
+        change();
+        await Store.SaveSettingsAsync();
+    }
+}

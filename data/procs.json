@@ -1,0 +1,44 @@
+[
+  {
+    "id": "proc_bloodlust_edge",
+    "name": "Bloodlust Edge",
+    "trigger": { "event": "onCrit", "abilityTags": ["melee"] },
+    "chance": 0.20,
+    "icdMs": 3000,
+    "effect": { "type": "resetCooldown", "ability": "execute_strike" },
+    "ui": { "glowAbility": "execute_strike", "sound": "proc_ping" }
+  },
+  {
+    "id": "proc_riposte",
+    "name": "Riposte",
+    "trigger": { "event": "onPerfectBlock" },
+    "chance": 1.0,
+    "effect": { "type": "applyAura", "aura": "riposte" },
+    "ui": { "glowAbility": "overpower", "sound": "proc_ping" }
+  },
+  {
+    "id": "proc_adrenaline",
+    "name": "Adrenaline",
+    "trigger": { "event": "onPerfectDodge" },
+    "chance": 1.0,
+    "effect": { "type": "gainResource", "amount": 25 },
+    "ui": { "sound": "proc_ping" }
+  },
+  {
+    "id": "proc_seething",
+    "name": "Seething",
+    "trigger": { "event": "onResourceSpent", "abilities": ["rampage"] },
+    "chance": 0.35,
+    "effect": { "type": "empowerNextCast", "ability": "raging_blow", "pct": 60, "durationMs": 10000, "name": "Seething" },
+    "ui": { "glowAbility": "raging_blow", "sound": "proc_ping" }
+  },
+  {
+    "id": "proc_battle_fervor",
+    "name": "Battle Fervor",
+    "trigger": { "event": "onTick" },
+    "ppm": 2.0,
+    "icdMs": 10000,
+    "effect": { "type": "hasteWindow", "pct": 20, "durationMs": 6000, "name": "Battle Fervor" },
+    "ui": { "sound": "proc_ping" }
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "berserker",
+    "name": "Berserker",
+    "resource": { "id": "fury", "name": "Fury", "max": 100, "start": 0, "color": "#e0452b" },
+    "baseStats": { "attackPower": 800, "critPct": 15, "hastePct": 5, "masteryPct": 5 },
+    "abilities": [
+      "raging_blow", "rending_strike", "slam", "rampage",
+      "execute_strike", "sunder_armor", "overpower", "berserker_rage",
+      "recklessness", "bloodrage"
+    ],
+    "procs": ["proc_bloodlust_edge", "proc_riposte", "proc_adrenaline", "proc_seething", "proc_battle_fervor"],
+    "defaultGear": ["notched_greataxe", "iron_helm", "chain_hauberk", "vial_of_fury"]
+  }
+]

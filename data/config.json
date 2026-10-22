@@ -1,0 +1,17 @@
+{
+  "baseGcdMs": 1500,
+  "minGcdMs": 750,
+  "spellQueueMs": 200,
+  "critMultiplier": 2.0,
+  "pandemicPct": 0.3,
+  "minAttackGapMs": 400,
+  "defense": {
+    "normalWindowMs": 400,
+    "perfectWindowMs": 150,
+    "recoveryMs": 300,
+    "staggerMs": 800,
+    "perfectAura": "perfect_edge",
+    "flow": { "enabled": true, "threshold": 5, "aura": "flow_burst" },
+    "maxInputOffsetMs": 150
+  }
+}

@@ -1,0 +1,59 @@
+@inject SettingsStore Store
+@inject GameData Data
+
+@if (!_ready)
+{
+    <div class="loading-screen">Loading…</div>
+}
+else
+{
+    switch (_screen)
+    {
+        case Screen.Menu:
+            <MenuScreen OnFight="StartFight" OnSettings="() => Go(Screen.Settings)" OnCalibrate="() => Go(Screen.Calibrate)" />
+            break;
+        case Screen.Fight:
+            <FightScreen @key="_fightKey" BossId="@_bossId" OnFinished="ShowResults" OnQuit="() => Go(Screen.Menu)" />
+            break;
+        case Screen.Results:
+            <ResultsScreen Result="_result" OnRetry="() => StartFight(_bossId)" OnMenu="() => Go(Screen.Menu)" />
+            break;
+        case Screen.Settings:
+            <SettingsScreen OnBack="() => Go(Screen.Menu)" OnCalibrate="() => Go(Screen.Calibrate)" />
+            break;
+        case Screen.Calibrate:
+            <CalibrateScreen OnBack="() => Go(Screen.Settings)" />
+            break;
+    }
+}
+
+@code {
+    enum Screen { Menu, Fight, Results, Settings, Calibrate }
+
+    bool _ready;
+    Screen _screen = Screen.Menu;
+    string _bossId;
+    int _fightKey;
+    FightResult _result;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Store.LoadAsync();
+        _ready = true;
+    }
+
+    void Go(Screen s) => _screen = s;
+
+    void StartFight(string bossId)
+    {
+        _bossId = bossId;
+        _fightKey++;
+        _screen = Screen.Fight;
+    }
+
+    void ShowResults(FightResult result)
+    {
+        _result = result;
+        _screen = Screen.Results;
+    }
+}

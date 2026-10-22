@@ -1,0 +1,122 @@
+@inject GameData Data
+@inject IJSRuntime JS
+@using Newtonsoft.Json
+@using RR.Sim.Core
+
+<div class="screen results">
+    <header class="results-head @(R.Victory ? "win" : "loss")">
+        <h1>@Headline</h1>
+        <p>@Result.Boss.Name · @R.DurationSeconds.ToString("0.0")s</p>
+    </header>
+
+    <section class="score-row">
+        @if (R.Victory)
+        {
+            <div class="score tier-@Result.Tier">
+                <span class="score-num">@Result.Score</span>
+                <span class="score-label">score</span>
+            </div>
+        }
+        else
+        {
+            <div class="score tier-grey">
+                <span class="score-num">–</span>
+                <span class="score-label">@(R.Reason == FightEndReason.Enraged ? "no kill, not scored" : "not scored")</span>
+            </div>
+        }
+        <div class="stat"><span class="v">@R.Dps.ToString("N0")</span><span class="l">DPS</span></div>
+        <div class="stat"><span class="v">@R.TotalDamage.ToString("N0")</span><span class="l">damage</span></div>
+        @if (Result.NewBest)
+        {
+            <div class="new-best">New best!</div>
+        }
+    </section>
+
+    <section class="stats-grid">
+        @if (R.Attacks > 0)
+        {
+            <div class="stat"><span class="v">@R.Perfects / @R.Attacks</span><span class="l">perfect defenses (@R.PerfectRate.ToString("P0"))</span></div>
+            <div class="stat"><span class="v">@R.AvoidRate.ToString("P0")</span><span class="l">attacks avoided</span></div>
+            <div class="stat"><span class="v">@R.HitsTaken</span><span class="l">hits taken</span></div>
+            <div class="stat"><span class="v">@R.FlowBursts</span><span class="l">flow bursts</span></div>
+        }
+        <div class="stat"><span class="v">@R.GcdUptime.ToString("P0")</span><span class="l">GCD uptime</span></div>
+        <div class="stat"><span class="v">@R.ResourceWasted</span><span class="l">Fury wasted to cap</span></div>
+    </section>
+
+    <section class="breakdown">
+        <h2>Damage by ability</h2>
+        <table>
+            <thead><tr><th>Ability</th><th>Damage</th><th>%</th><th>Casts</th><th>Hits</th><th>Crit</th></tr></thead>
+            <tbody>
+                @foreach (var s in R.Sources.Where(s => s.Damage > 0 || s.Casts > 0))
+                {
+                    double pct = R.TotalDamage > 0 ? s.Damage * 100.0 / R.TotalDamage : 0;
+                    <tr>
+                        <td><span class="bar-fill" style="width:@pct.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)%"></span>@Icon(s.SourceId) @NameOf(s.SourceId)</td>
+                        <td>@s.Damage.ToString("N0")</td>
+                        <td>@pct.ToString("0.0")</td>
+                        <td>@(s.Casts > 0 ? s.Casts.ToString() : "–")</td>
+                        <td>@s.Hits</td>
+                        <td>@(s.Hits > 0 ? (s.Crits * 100 / s.Hits) + "%" : "–")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (R.ProcCounts.Count > 0)
+        {
+            <h2>Procs</h2>
+            <ul class="procs">
+                @foreach (var p in R.ProcCounts.OrderByDescending(p => p.Value))
+                {
+                    <li>@(Data.Procs.TryGetValue(p.Key, out var pd) ? pd.Name : p.Key) <b>×@p.Value</b></li>
+                }
+            </ul>
+        }
+    </section>
+
+    <nav class="menu-actions">
+        <button class="btn primary" @onclick="OnRetry">Fight again</button>
+        <button class="btn" @onclick="OnMenu">Menu</button>
+        <button class="btn" @onclick="DownloadLog">Download fight log</button>
+    </nav>
+</div>
+
+@code {
+    [Parameter] public FightResult Result { get; set; }
+    [Parameter] public EventCallback OnRetry { get; set; }
+    [Parameter] public EventCallback OnMenu { get; set; }
+
+    RR.Sim.Scoring.FightReport R => Result.Report;
+
+    string Headline => R.Reason switch
+    {
+        FightEndReason.Killed => "Victory",
+        FightEndReason.DummyComplete => "Time!",
+        FightEndReason.Enraged => "Enraged",
+        _ => "Fight abandoned",
+    };
+
+    string NameOf(string id)
+    {
+        if (Data.Abilities.TryGetValue(id, out var a)) return a.Name;
+        if (Data.Auras.TryGetValue(id, out var au)) return au.Name;
+        if (Data.Procs.TryGetValue(id, out var p)) return p.Name;
+        return id;
+    }
+
+    string Icon(string id)
+    {
+        if (Data.Abilities.TryGetValue(id, out var a)) return a.Icon;
+        if (Data.Auras.TryGetValue(id, out var au)) return au.Icon;
+        return "";
+    }
+
+    async Task DownloadLog()
+    {
+        var json = JsonConvert.SerializeObject(Result.Log, Formatting.Indented);
+        var name = $"fightlog-{Result.Boss.Id}-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json";
+        await JS.InvokeVoidAsync("RR.download", name, json);
+    }
+}
